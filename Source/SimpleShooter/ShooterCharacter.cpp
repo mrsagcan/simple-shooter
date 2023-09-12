@@ -3,6 +3,7 @@
 
 #include "ShooterCharacter.h"
 #include "Gun.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -21,6 +22,8 @@ void AShooterCharacter::BeginPlay()
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	Gun->SetOwner(this);
+
+	Health = MaxHealth;
 }
 
 // Called every frame
@@ -45,6 +48,28 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
 }
 
+float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	if (Health > 0)
+	{
+		Health -= DamageApplied;
+		UE_LOG(LogTemp, Display, TEXT("Health: %f"), Health);
+	}
+	return DamageApplied;
+}
+
+void AShooterCharacter::Shoot()
+{
+	Gun->PullTrigger();
+}
+
+bool AShooterCharacter::IsDead() const
+{
+	return Health <= 0;
+}
+
 void AShooterCharacter::MoveForward(float AxisValue)
 {
 	AddMovementInput(GetActorForwardVector() * AxisValue);
@@ -65,9 +90,5 @@ void AShooterCharacter::LookRightRate(float AxisValue)
 	AddControllerYawInput(AxisValue * RotationRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AShooterCharacter::Shoot()
-{
-	Gun->PullTrigger();
-}
 
 
