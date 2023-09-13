@@ -10,8 +10,8 @@ UCLASS()
 class SIMPLESHOOTER_API AGun : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AGun();
 
@@ -21,7 +21,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -37,11 +37,21 @@ private:
 		UParticleSystem* MuzzleFlash;
 
 	UPROPERTY(EditAnywhere)
+		USoundBase* MuzzleSound;
+
+	UPROPERTY(EditAnywhere)
 		UParticleSystem* ImpactEffect;
+
+	UPROPERTY(EditAnywhere)
+		USoundBase* ImpactSound;
 
 	UPROPERTY(EditAnywhere)
 		float MaxRange = 1000.f;
 
 	UPROPERTY(EditAnywhere)
 		float Damage = 10.f;
+
+	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
+
+	AController* GetOwnerController() const;
 };
