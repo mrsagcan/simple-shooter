@@ -21,27 +21,35 @@ AGun::AGun()
 
 void AGun::PullTrigger()
 {
-	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
-	UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
-
 	FHitResult Hit;
 	FVector ShotDirection;
 	bool bSuccess = GunTrace(Hit, ShotDirection);
-	if (bSuccess)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.Location, ShotDirection.Rotation());
-		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ImpactSound, Hit.Location, ShotDirection.Rotation());
-		AActor* HitActor = Hit.GetActor();
-		
-		if (HitActor)
-		{
-			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
-			AController* OwnerController = GetOwnerController();
-			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
-		}
-	
-	}
 
+	if (Ammo > 0)
+	{
+		UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
+		UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
+		Ammo--;
+
+		if (bSuccess)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.Location, ShotDirection.Rotation());
+			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ImpactSound, Hit.Location, ShotDirection.Rotation());
+			AActor* HitActor = Hit.GetActor();
+
+
+			if (HitActor)
+			{
+				FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
+				AController* OwnerController = GetOwnerController();
+				HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			}
+		}
+	}
+	else
+	{
+		UGameplayStatics::SpawnSoundAttached(EmptySound, Mesh, TEXT("MuzzleFlashSocket"));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -57,6 +65,11 @@ void AGun::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AGun::AddAmmo(int32 Amount)
+{
+	Ammo += Amount;
+}
+
 
 bool AGun::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 {
@@ -70,6 +83,7 @@ bool AGun::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	ShotDirection = -Rotation.Vector();
 	FVector End = Location + Rotation.Vector() * MaxRange;
 
+	//Bullet ignores the gun and the character itself.
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
@@ -84,3 +98,4 @@ AController* AGun::GetOwnerController() const
 		return nullptr;
 	return OwnerPawn->GetController();
 }
+

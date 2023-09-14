@@ -25,6 +25,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void AddAmmo(int32 Amount);
+
 private:
 
 	UPROPERTY(VisibleAnywhere)
@@ -46,10 +48,16 @@ private:
 		USoundBase* ImpactSound;
 
 	UPROPERTY(EditAnywhere)
+		USoundBase* EmptySound;
+
+	UPROPERTY(EditAnywhere)
 		float MaxRange = 1000.f;
 
 	UPROPERTY(EditAnywhere)
 		float Damage = 10.f;
+
+	UPROPERTY(EditAnywhere)
+		int32 Ammo = 30;
 
 	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 

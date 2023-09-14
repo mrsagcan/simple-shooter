@@ -1,6 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+//TODO: Make ammo visible to player.
+//TODO: Make ammo pickups.
+//TODO: Make AI patrol until it sees the player.
+//TODO: Add Main Menu
+	//Play button.
+	//Settings button.
+		//Sound setting
+		//Graphics quality setting
+		//Brightness setting
+	//Quit button.
+
 #include "ShooterCharacter.h"
 #include "Gun.h"
 #include "Engine/DamageEvents.h"
@@ -21,10 +32,7 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
-	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
-	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
-	Gun->SetOwner(this);
+	SpawnWeapons();
 
 	Health = MaxHealth;
 }
@@ -49,6 +57,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis(TEXT("LookRightRate"), this, &AShooterCharacter::LookRightRate);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
+	PlayerInputComponent->BindAction(TEXT("NextWeapon"), EInputEvent::IE_Pressed, this, &AShooterCharacter::NextWeapon);
+	PlayerInputComponent->BindAction(TEXT("PreviousWeapon"), EInputEvent::IE_Pressed, this, &AShooterCharacter::PreviousWeapon);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -75,7 +85,17 @@ float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent cons
 
 void AShooterCharacter::Shoot()
 {
-	Gun->PullTrigger();
+	Guns[ActiveIndex]->PullTrigger();
+}
+
+void AShooterCharacter::NextWeapon()
+{
+	ActivateWeapon(ActiveIndex + 1);
+}
+
+void AShooterCharacter::PreviousWeapon()
+{
+	ActivateWeapon(ActiveIndex - 1);
 }
 
 bool AShooterCharacter::IsDead() const
@@ -86,6 +106,11 @@ bool AShooterCharacter::IsDead() const
 float AShooterCharacter::GetHealthPercent() const
 {
 	return Health / MaxHealth;
+}
+
+AGun* AShooterCharacter::GetEquippedWeapon() const
+{
+	return Guns[ActiveIndex];
 }
 
 void AShooterCharacter::MoveForward(float AxisValue)
@@ -109,4 +134,27 @@ void AShooterCharacter::LookRightRate(float AxisValue)
 }
 
 
+
+void AShooterCharacter::SpawnWeapons()
+{
+	for (auto GunClass : GunClasses)
+	{
+		AGun* Gun = GetWorld()->SpawnActor<AGun>(GunClass);
+		GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
+		Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+		Gun->SetOwner(this);
+		Guns.Add(Gun);
+	}
+	ActivateWeapon(0);
+}
+
+void AShooterCharacter::ActivateWeapon(int32 Index)
+{
+	for (auto Weapon : Guns)
+	{
+		Weapon->SetActorHiddenInGame(true);
+	}
+	ActiveIndex = Index < 0 ? Index + Guns.Num() : Index % Guns.Num();
+	Guns[ActiveIndex]->SetActorHiddenInGame(false);
+}
 

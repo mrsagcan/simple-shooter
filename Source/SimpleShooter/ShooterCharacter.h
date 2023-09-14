@@ -38,13 +38,24 @@ public:
 	UFUNCTION(BlueprintPure)
 		float GetHealthPercent() const;
 
+	UFUNCTION(BlueprintPure)
+		AGun* GetEquippedWeapon() const;
+
 
 private:
+
+	int32 ActiveIndex = 0;
 
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
 	void LookUpRate(float AxisValue);
 	void LookRightRate(float AxisValue);
+	void NextWeapon();
+	void PreviousWeapon();
+
+	void SpawnWeapons();
+	void ActivateWeapon(int32 Index);
+
 
 	UPROPERTY(EditAnywhere)
 		float RotationRate = 10;
@@ -53,11 +64,12 @@ private:
 		float MaxHealth = 100;
 
 	UPROPERTY(VisibleAnywhere)
-		float Health;
+		float Health = 10.f;
 
 	UPROPERTY(EditDefaultsOnly)
-		TSubclassOf<AGun> GunClass;
+		TArray<TSubclassOf<AGun>> GunClasses;
 
 	UPROPERTY()
-		AGun* Gun;
+		TArray<AGun*> Guns;
+
 };
