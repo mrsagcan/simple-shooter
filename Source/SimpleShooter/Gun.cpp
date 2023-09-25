@@ -17,6 +17,8 @@ AGun::AGun()
 
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(Root);
+
+	Ammo = MaxAmmo;
 }
 
 void AGun::PullTrigger()
@@ -25,7 +27,7 @@ void AGun::PullTrigger()
 	FVector ShotDirection;
 	bool bSuccess = GunTrace(Hit, ShotDirection);
 
-	if (Ammo > 0)
+	if (Ammo > 0 && !GetWorldTimerManager().IsTimerActive(ReloadTimer))
 	{
 		UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
 		UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
@@ -50,6 +52,17 @@ void AGun::PullTrigger()
 	{
 		UGameplayStatics::SpawnSoundAttached(EmptySound, Mesh, TEXT("MuzzleFlashSocket"));
 	}
+	if (Ammo == 0)
+	{
+		Reload();
+	}
+}
+
+void AGun::Reload()
+{
+	GetWorldTimerManager().SetTimer(ReloadTimer, ReloadSound->GetDuration(), false);
+	UGameplayStatics::SpawnSoundAttached(ReloadSound, Mesh, TEXT("MuzzleFlashSocket"));
+	Ammo = MaxAmmo;
 }
 
 // Called when the game starts or when spawned
@@ -63,11 +76,6 @@ void AGun::BeginPlay()
 void AGun::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
-
-void AGun::AddAmmo(int32 Amount)
-{
-	Ammo += Amount;
 }
 
 

@@ -31,6 +31,7 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	void Shoot();
+	void Reload();
 
 	UFUNCTION(BlueprintPure)
 		bool IsDead() const;
@@ -55,7 +56,6 @@ private:
 
 	void SpawnWeapons();
 	void ActivateWeapon(int32 Index);
-
 
 	UPROPERTY(EditAnywhere)
 		float RotationRate = 10;

@@ -17,6 +17,8 @@ public:
 
 	void PullTrigger();
 
+	void Reload();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,10 +27,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void AddAmmo(int32 Amount);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		int32 Ammo;
+
 
 private:
-
 	UPROPERTY(VisibleAnywhere)
 		USceneComponent* Root;
 
@@ -51,13 +54,18 @@ private:
 		USoundBase* EmptySound;
 
 	UPROPERTY(EditAnywhere)
+		USoundBase* ReloadSound;
+
+	UPROPERTY(EditAnywhere)
 		float MaxRange = 1000.f;
 
 	UPROPERTY(EditAnywhere)
 		float Damage = 10.f;
 
 	UPROPERTY(EditAnywhere)
-		int32 Ammo = 30;
+		int32 MaxAmmo = 30;
+	FTimerHandle ReloadTimer;
+
 
 	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 

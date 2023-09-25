@@ -1,9 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-//TODO: Make ammo visible to player.
-//TODO: Make ammo pickups.
-//TODO: Make AI patrol until it sees the player.
 //TODO: Add Main Menu
 	//Play button.
 	//Settings button.
@@ -35,6 +32,7 @@ void AShooterCharacter::BeginPlay()
 	SpawnWeapons();
 
 	Health = MaxHealth;
+
 }
 
 // Called every frame
@@ -59,6 +57,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
 	PlayerInputComponent->BindAction(TEXT("NextWeapon"), EInputEvent::IE_Pressed, this, &AShooterCharacter::NextWeapon);
 	PlayerInputComponent->BindAction(TEXT("PreviousWeapon"), EInputEvent::IE_Pressed, this, &AShooterCharacter::PreviousWeapon);
+	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Reload);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -86,6 +85,11 @@ float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent cons
 void AShooterCharacter::Shoot()
 {
 	Guns[ActiveIndex]->PullTrigger();
+}
+
+void AShooterCharacter::Reload()
+{
+	Guns[ActiveIndex]->Reload();
 }
 
 void AShooterCharacter::NextWeapon()
